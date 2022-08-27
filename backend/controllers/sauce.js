@@ -1,5 +1,5 @@
-const Sauce = require("../models/modelsSauce");
 const fs = require("fs");
+const Sauce = require("../models/sauce");
 
 exports.listSauces = (req, res, next) => {
   Sauce.find({})
