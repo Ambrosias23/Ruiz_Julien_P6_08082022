@@ -1,6 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const mongoSanitize = require("express-mongo-sanitize");
+const rateLimit = require("express-rate-limit");
+const dotenv = require('dotenv');
+dotenv.config();
+const helmet = require('helmet');
 
 const saucesRoutes = require("./routes/sauces");
 const usersRoutes = require("./routes/users");
@@ -29,8 +34,25 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.use(express.json());
 app.use(bodyParser.json());
+// MongoSanitize, security
+app.use(mongoSanitize({ 
+  replaceWith : '_', 
+}), 
+);
+
+//express-rate-limit, security
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: "Too many request from this IP"
+});
+app.use(limiter);
+
+app.use(helmet());
+app.disable('x-powered-by');
 
 app.use("/api/sauces", saucesRoutes);
 app.use("/api/auth", usersRoutes);
