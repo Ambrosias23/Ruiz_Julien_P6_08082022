@@ -1,6 +1,6 @@
 node_modules
 backend/images/*
-!backend/images/*
+!backend/images/.tmp
 
 
 
