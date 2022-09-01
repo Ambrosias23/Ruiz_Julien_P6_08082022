@@ -1,7 +1,2 @@
-/backend/node_modules
-/fronten/node_modules
-backend/images/*
-!backend/images/.tmp
-
-
-
+node_modules
+images
