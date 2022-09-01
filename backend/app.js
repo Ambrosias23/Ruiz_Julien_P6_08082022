@@ -12,26 +12,26 @@ const usersRoutes = require("./routes/users");
 const path = require("path");
 
 mongoose
-  .connect(
-    "mongodb+srv://ambrosias23:nCu0mtXXVMae9eRh@cluster0.c2auadu.mongodb.net/?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
-  .then(() => console.log("Connexion à MongoDB réussie !"))
-  .catch(() => console.log("Connexion à MongoDB échouée !"));
+.connect(
+	`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/?retryWrites=true&w=majority`,
+	{ useNewUrlParser: true, useUnifiedTopology: true }
+)
+.then(() => console.log("Connexion à MongoDB réussie !"))
+.catch(() => console.log("Connexion à MongoDB échouée !"));
 
 const app = express();
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
-  next();
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader(
+		"Access-Control-Allow-Headers",
+		"Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
+	);
+	res.setHeader(
+		"Access-Control-Allow-Methods",
+		"GET, POST, PUT, DELETE, PATCH, OPTIONS"
+	);
+	next();
 });
 
 
@@ -39,19 +39,17 @@ app.use(express.json());
 app.use(bodyParser.json());
 // MongoSanitize, security
 app.use(mongoSanitize({ 
-  replaceWith : '_', 
-}), 
-);
-
-//express-rate-limit, security
+	replaceWith : '_',
+}));
+// Express-rate-limit, security
 const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: "Too many request from this IP"
+	max: 100,
+	windowMs: 60 * 60 * 1000,
+	message: "Too many request from this IP"
 });
 app.use(limiter);
 
-app.use(helmet());
+app.use(helmet({crossOriginResourcePolicy: false}));
 app.disable('x-powered-by');
 
 app.use("/api/sauces", saucesRoutes);

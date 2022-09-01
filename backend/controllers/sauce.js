@@ -29,7 +29,41 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
-  if (req.file) {
+	Sauce.findOne({ _id: req.params.id })
+	.then((sauce) => {
+		let sauceObject;
+		if(req.file) {
+			// Deleting previous image
+			const filename = sauce.imageUrl.split("/images/")[1];
+			fs.unlink(`images/${filename}`, () => console.log("Image supprimée !"));
+			sauceObject = {
+				...JSON.parse(req.body.sauce),
+				imageUrl: `${req.protocol}://${req.get("host")}/images/${
+					req.file.filename
+				}`,
+			};
+		}
+		else {
+			sauceObject = { ...req.body };
+		}
+		// Checking userId
+		if(req.auth.userId !== sauce.userId) {
+			res.status(403).json({ message: "Vous ne pouvez pas modifier cette sauce." });
+		}
+		else {
+			// Updating Sauce
+			Sauce.updateOne(
+				{ _id: req.params.id },
+				{ ...sauceObject, _id: req.params.id }
+			)
+			.then(() => res.status(200).json({ message: "Article modifiée !" }))
+			.catch((error) => res.status(400).json({ error: error }));
+		}
+	})
+	.catch((error) => res.status(404).json({ error }));
+
+/*
+  if(req.file) {
     Sauce.findOne({ _id: req.params.id }).then((sauce) => {
       const filename = sauce.imageUrl.split("/images/")[1];
       console.log(sauce.imageUrl);
@@ -50,6 +84,7 @@ exports.modifySauce = (req, res, next) => {
   )
     .then(() => res.status(200).json({ message: "Article modifiée !" }))
     .catch((error) => res.status(400).json({ error: error }));
+*/
 };
 
 exports.deleteSauce = (req, res, next) => {
